@@ -22,6 +22,24 @@ function getClosestColor(clr) {
 	return chosen;
 }
 
+function getColor(idata, x, y, w, h) {
+    var r = 0, g = 0, b = 0, i = 0;
+    for (var _x = x; _x < x + w; _x++) {
+        for (var _y = y; _y < y + h; _y++) {
+            var o = Math.floor((_x - w) + Math.floor( (_y - h) * idata.width)) * 4;
+            i++;
+            r += idata.data[o];
+            g += idata.data[o + 1];
+            b += idata.data[o + 2];
+        }
+    }
+    return {
+        r: r / i | 0,
+        g: g / i | 0,
+        b: b / i | 0
+    };
+}
+
 const codes = document.getElementById('codes');
 const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
@@ -30,62 +48,28 @@ image.crossOrigin = 'Anonymous';
 image.onload = init;
 image.src = 'http://i.imgur.com/DbCf4Ab.jpg';
 
-const resolution = 4; // change me for the resolution of the image
-const pScale = 1.5;
-const cellSize = 10;
-let scale = 4; // I don't really matter unless you want to make me yuge
+//const resolution = 4; // ~3 seconds
+const resolution = 2; // ~13 seconds, I'd love to trim this to < 5 if possible :/ 
 
 function init() {
-	context.font = '7pt courier';
-	const min = context.measureText('00000').width; // sue me, text has to be readable. 
-	while( scale * resolution < min ) {
-		scale += 0.1;
-	}
-	canvas.height = this.height * scale + scale*resolution;
-	canvas.width = this.width * scale + scale*resolution;
+	console.time('generate');
+	canvas.height = this.height;
+	canvas.width = this.width;
 	context.drawImage(this, 0, 0);
-	context.font = '7pt courier';
-	const data = context.getImageData(0, 0, this.width, this.height).data;
-	context.fillStyle = '#000';
-	context.fillRect(0, 0, canvas.width, canvas.height);
-	let pX = 0;
-	let pY = 0;
+	const idata = context.getImageData(0, 0, this.width, this.height);
+	const grid = [];
 	for( let y = 0; y < this.height; y += resolution ) {
-		pX = 0;
-		if( (y/resolution) % cellSize === 0 ) {
-			pY+=pScale;
-		}
+		const yIndex = y/resolution;
+		grid[yIndex] = [];
 		for( let x = 0; x < this.width; x += resolution ) {
+			const xIndex = x / resolution;
 			const o = x * 4 + y * 4 * this.width;
-			if( (x/resolution) % cellSize === 0 ){
-				pX+=pScale;
-				if( (y/resolution) % cellSize === 0  ) { // ugh, yes
-					context.fillStyle = '#fff';
-					context.fillText(`${pX/pScale},${pY/pScale}`, (x+pX)*scale, (y+pY)*scale - 2);
-				}
-			}
-			// todo, get the avg colour and not just the top-left corner for the cells.
-			const rgb = {
-				r: data[o],
-				g: data[o+1],
-				b: data[o+2]
-			};
+			const rgb = getColor(idata, x, y, resolution, resolution);
 			const closest = getClosestColor(rgb);
-			const lum = data[o] * 0.2126 + data[o+1] * 0.7152 + data[o+2] * 0.0722;
-			context.beginPath();
-			context.fillStyle = `rgb(${closest.code.r},${closest.code.g},${closest.code.b})`;
-			context.rect((x+pX)*scale,(y+pY)*scale,resolution*scale,resolution*scale);
-			context.fill();
-			context.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-			context.stroke();
-			if( lum > 100 ) {
-				context.fillStyle = '#000';
-			} else {
-				context.fillStyle = '#fff';
-			}
-			context.fillText(closest.key, (x+pX)*scale, (y+pY)*scale + 8);
-			context.closePath();
+			const lum = idata.data[o] * 0.2126 + idata.data[o+1] * 0.7152 + idata.data[o+2] * 0.0722;
+			grid[yIndex][xIndex] = {rgb: closest, lum};
 		}
 	}
+	console.timeEnd('generate');
 	document.body.appendChild(this);
 }
