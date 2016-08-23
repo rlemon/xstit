@@ -1,7 +1,4 @@
 function getColorWeight(clr1, clr2) {
-	// return 	Math.sqrt(Math.pow((clr2.r - clr1.r), 2) + 
-	// 		Math.pow((clr2.g - clr1.g), 2) + 
-	// 		Math.pow((clr2.b - clr1.b), 2)) // because I'm not checking an actual distance, just weight, fuck sqrt
 	return 	Math.pow((clr2.r - clr1.r), 2) + 
 			Math.pow((clr2.g - clr1.g), 2) + 
 			Math.pow((clr2.b - clr1.b), 2)
@@ -96,14 +93,14 @@ function renderImage() {
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	for( let y = 0; y < grid.length; y++ ) {
 		pX = 0;
-		if( (y+1) % 10 === 0 ) {
+		if( y !== 0 && y % 10 === 0 ) {
 			pY += pScale;
 		}
 		cY = y * resolution;
 		for( let x = 0; x < grid[y].length; x++ ) {
 			const lum = grid[y][x].lum;
 			const {code,key} = grid[y][x].dnc;
-			if( (x+1) % 10 === 0 ) {
+			if( x !== 0 && x % 10 === 0 ) {
 				pX += pScale;
 			}
 			cX = x * resolution;
@@ -121,16 +118,10 @@ function renderImage() {
 	splitImage();
 }
 
-
-// this is still fucked because of the padding between.. I think I'm close to making it work. whatever.  
-// basically I want to split the image into sub-images so I can print them. I need to label the individual
-// images (x,y) and keep the groupings of 10*10 cells together. 
-// this doesn't work. the cells get shifted each row and start negative shifted... and I have no clue why.
-
 function splitImage() {
 	console.time('splitImage');
-	const height = ((resolution*scale) * 10) * 5 - (resolution*scale) + (pScale * 4.5)
-	const width = ((resolution*scale) * 10) * 4 - (resolution*scale) + (pScale * 3.5)
+	const height = ((resolution*scale) * 10) * 5 + (pScale * 4.5)
+	const width = ((resolution*scale) * 10) * 4 + (pScale * 4)
 	let cX = 0;
 	let cY = 0;
 	while(cY < canvas.height ) {
