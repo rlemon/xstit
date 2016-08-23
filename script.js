@@ -119,26 +119,26 @@ function main() {
 	console.timeEnd('render full image');
 	//split();
 }
-
-function split() {
-	const w = resolution * 10 * 4;
-	const h = resolution * 10 * 5;
-	let cX = 0;
-	let cY = 0;
-	const scale = 10;
-	while( cY < canvas.height ) {
-		cX = 0;
-		while( cX < canvas.width )  {
-			const img = document.createElement('canvas');
-			const ctx = img.getContext('2d');
-			img.height = h * scale;
-			img.width = w * scale;
-			ctx.drawImage(canvas, cX, cY, canvas.width, canvas.height, 0, 0, canvas.width * scale, canvas.height * scale);
-			document.body.appendChild(img);
-			cX += w;
-		}
-		cY += h;
-		document.body.appendChild(document.createElement('BR'));
-	}
-	canvas.hidden = true;
-}
+// non working code to split the full image into printer friendly images
+// function split() {
+// 	const w = resolution * 10 * 4;
+// 	const h = resolution * 10 * 5;
+// 	let cX = 0;
+// 	let cY = 0;
+// 	const scale = 10;
+// 	while( cY < canvas.height ) {
+// 		cX = 0;
+// 		while( cX < canvas.width )  {
+// 			const img = document.createElement('canvas');
+// 			const ctx = img.getContext('2d');
+// 			img.height = h * scale;
+// 			img.width = w * scale;
+// 			ctx.drawImage(canvas, cX, cY, canvas.width, canvas.height, 0, 0, canvas.width * scale, canvas.height * scale);
+// 			document.body.appendChild(img);
+// 			cX += w;
+// 		}
+// 		cY += h;
+// 		document.body.appendChild(document.createElement('BR'));
+// 	}
+// 	canvas.hidden = true;
+// }
