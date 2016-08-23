@@ -91,6 +91,7 @@ function main() {
 	context.font = '7pt courier';
 	context.lineWidth = 1;
 	context.fillStyle = '#fff';
+	context.strokeStyle = 'rgba(0, 0, 0, 1)';
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	for( let y = 0; y < grid.length; y++ ) {
 		pX = 0;
@@ -108,7 +109,6 @@ function main() {
 			context.beginPath();
 			context.fillStyle = `rgb(${code.r},${code.g},${code.b})`;
 			context.rect(cX*scale+pX, cY*scale+pY, resolution*scale, resolution*scale);
-			context.strokeStyle = 'rgba(0, 0, 0, 1)';
 			context.fill();
 			context.stroke();
 			context.fillStyle = lum > 100 ? '#000' : '#fff';
