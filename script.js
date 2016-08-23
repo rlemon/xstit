@@ -43,24 +43,25 @@ function getColor(idata, x, y, w, h) {
     };
 }
 
-const codes = document.getElementById('codes');
-const canvas = document.getElementById('canvas');
+const canvas = document.createElement('canvas');
 const context = canvas.getContext('2d');
 const image = new Image();
 image.crossOrigin = 'Anonymous';
-image.onload = main;
+image.onload = parseImage;
 image.src = 'http://i.imgur.com/DbCf4Ab.jpg';
 
 const resolution = 4; // ~3 seconds
 //const resolution = 2; // ~13 seconds, I'd love to trim this to < 5 if possible :/ 
+const pScale = 2;
+const scale = 10;
+const grid = [];
 
-function main() {
-	console.time('generate new matrix');
+function parseImage() {
+	console.time('parseImage');
 	canvas.height = this.height;
 	canvas.width = this.width;
 	context.drawImage(this, 0, 0);
 	const idata = context.getImageData(0, 0, this.width, this.height);
-	const grid = [];
 	for( let y = 0; y < this.height - resolution; y += resolution ) {
 		const yIndex = y/resolution;
 		grid[yIndex] = [];
@@ -74,15 +75,15 @@ function main() {
 			grid[yIndex][xIndex] = {dnc: closest, lum};
 		}
 	}
-	console.timeEnd('generate new matrix');
-	// 
-	console.time('render full image')
+	console.timeEnd('parseImage');
+	renderImage();
+}
+function renderImage() {
+	console.time('renderImage')
 	let cX = 0;
 	let cY = 0;
 	let pY = 0;
 	let pX = 0;
-	const pScale = 2;
-	const scale = 10;
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	canvas.height *= scale;
 	canvas.width *= scale;
@@ -98,14 +99,14 @@ function main() {
 		if( (y+1) % 10 === 0 ) {
 			pY += pScale;
 		}
-		cY = (y) * resolution;
+		cY = y * resolution;
 		for( let x = 0; x < grid[y].length; x++ ) {
 			const lum = grid[y][x].lum;
 			const {code,key} = grid[y][x].dnc;
 			if( (x+1) % 10 === 0 ) {
 				pX += pScale;
 			}
-			cX = (x) * resolution;
+			cX = x * resolution;
 			context.beginPath();
 			context.fillStyle = `rgb(${code.r},${code.g},${code.b})`;
 			context.rect(cX*scale+pX, cY*scale+pY, resolution*scale, resolution*scale);
@@ -116,29 +117,29 @@ function main() {
 			context.closePath();
 		}
 	}
-	console.timeEnd('render full image');
-	//split();
+	console.timeEnd('renderImage');
+	splitImage();
 }
-// non working code to split the full image into printer friendly images
-// function split() {
-// 	const w = resolution * 10 * 4;
-// 	const h = resolution * 10 * 5;
-// 	let cX = 0;
-// 	let cY = 0;
-// 	const scale = 10;
-// 	while( cY < canvas.height ) {
-// 		cX = 0;
-// 		while( cX < canvas.width )  {
-// 			const img = document.createElement('canvas');
-// 			const ctx = img.getContext('2d');
-// 			img.height = h * scale;
-// 			img.width = w * scale;
-// 			ctx.drawImage(canvas, cX, cY, canvas.width, canvas.height, 0, 0, canvas.width * scale, canvas.height * scale);
-// 			document.body.appendChild(img);
-// 			cX += w;
-// 		}
-// 		cY += h;
-// 		document.body.appendChild(document.createElement('BR'));
-// 	}
-// 	canvas.hidden = true;
-// }
+// this is still fucked because of the padding between.. I think I'm close to making it work. whatever.  
+function splitImage() {
+	console.time('splitImage');
+	const height = (resolution*scale) * 10 * 5 - (resolution*scale) + (pScale * 4.5)
+	const width = (resolution*scale) * 10 * 4 - (resolution*scale) + (pScale * 3.5)
+	let cX = 0;
+	let cY = 0;
+	while(cY < canvas.height ) {
+		while( cX < canvas.width ) {
+			const img = document.createElement('canvas');
+			const ctx = img.getContext('2d');
+			img.height = height + 16;
+			img.width = width;
+			ctx.drawImage(canvas, cX, cY, canvas.width, canvas.height, 0, 16, canvas.width, canvas.height);
+			ctx.fillText(`${cX/width},${cY/height}`, 6, 12);
+			document.body.appendChild(img);
+			cX += width;
+		}
+		cY += height;
+		cX = 0;
+	}
+	console.timeEnd('splitImage');
+}
