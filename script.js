@@ -53,7 +53,7 @@ image.src = 'http://i.imgur.com/DbCf4Ab.jpg';
 const resolution = 4; // ~3 seconds
 //const resolution = 2; // ~13 seconds, I'd love to trim this to < 5 if possible :/ 
 const pScale = 2;
-const scale = 10;
+const scale = 7;
 const grid = [];
 
 function parseImage() {
@@ -113,18 +113,24 @@ function renderImage() {
 			context.fill();
 			context.stroke();
 			context.fillStyle = lum > 100 ? '#000' : '#fff';
-			context.fillText(key, cX*scale+4+pX, cY*scale+(resolution*scale)/2+pY);
+			context.fillText(key, cX*scale+2+pX, cY*scale+(resolution*scale)/2+pY);
 			context.closePath();
 		}
 	}
 	console.timeEnd('renderImage');
 	splitImage();
 }
+
+
 // this is still fucked because of the padding between.. I think I'm close to making it work. whatever.  
+// basically I want to split the image into sub-images so I can print them. I need to label the individual
+// images (x,y) and keep the groupings of 10*10 cells together. 
+// this doesn't work. the cells get shifted each row and start negative shifted... and I have no clue why.
+
 function splitImage() {
 	console.time('splitImage');
-	const height = (resolution*scale) * 10 * 5 - (resolution*scale) + (pScale * 4.5)
-	const width = (resolution*scale) * 10 * 4 - (resolution*scale) + (pScale * 3.5)
+	const height = ((resolution*scale) * 10) * 5 - (resolution*scale) + (pScale * 4.5)
+	const width = ((resolution*scale) * 10) * 4 - (resolution*scale) + (pScale * 3.5)
 	let cX = 0;
 	let cY = 0;
 	while(cY < canvas.height ) {
