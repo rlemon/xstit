@@ -48,19 +48,19 @@ const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
 const image = new Image();
 image.crossOrigin = 'Anonymous';
-image.onload = init;
+image.onload = main;
 image.src = 'http://i.imgur.com/DbCf4Ab.jpg';
 
 const resolution = 4; // ~3 seconds
 //const resolution = 2; // ~13 seconds, I'd love to trim this to < 5 if possible :/ 
-const grid = [];
 
-function init() {
+function main() {
 	console.time('generate');
 	canvas.height = this.height;
 	canvas.width = this.width;
 	context.drawImage(this, 0, 0);
 	const idata = context.getImageData(0, 0, this.width, this.height);
+	const grid = [];
 	for( let y = 0; y < this.height - resolution; y += resolution ) {
 		const yIndex = y/resolution;
 		grid[yIndex] = [];
@@ -74,10 +74,6 @@ function init() {
 		}
 	}
 	console.timeEnd('generate');
-	render();
-}
-
-function render() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	for( let y = 0; y < grid.length; y++ ) {
 		for( let x = 0; x < grid[y].length; x++ ) {
@@ -89,4 +85,27 @@ function render() {
 			context.closePath();
 		}
 	}
+	split();
+}
+
+function split() {
+	const w = resolution * 10 * 4;
+	const h = resolution * 10 * 5;
+	let cX = 0;
+	let cY = 0;
+	while( cY < canvas.height ) {
+		cX = 0;
+		while( cX < canvas.width )  {
+			const img = document.createElement('canvas');
+			const ctx = img.getContext('2d');
+			img.height = h;
+			img.width = w;
+			ctx.drawImage(canvas, cX, cY, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+			document.body.appendChild(img);
+			cX += w;
+		}
+		cY += h;
+		document.body.appendChild(document.createElement('BR'));
+	}
+	canvas.hidden = true;
 }
